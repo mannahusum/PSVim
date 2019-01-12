@@ -1,6 +1,13 @@
 $NewInstanceName='gPsVim'
 
-if (!(Test-Path alias:gvim))
+[bool]
+function isWindows
+{
+  $Windows = [Runtime.InteropServices.OsPlatform]::Windows
+  return [Runtime.InteropServices.RuntimeInformation]::IsOSPlatform(Windows)
+}
+
+if (!(Test-Path alias:gvim) -and isWindows)
 {
     $gvimPath = (Get-ItemProperty HKLM:\SOFTWARE\Vim\Gvim -Name Path).Path
     Set-Alias gvim $gvimPath
@@ -17,14 +24,14 @@ function LaunchVim
     $ErrorFormat,
     [Switch]
     $NewInstance
-  )  
+  )
     $vimArgs = @()
     if($NewInstance)
     {
-        if($ErrorFormat){    
+        if($ErrorFormat){
             $vimArgs = '-c', ":set errorformat=$ErrorFormat"
         }
-        
+
         $vimArgs += '-c', ":cf $errorFile"
     }
     else
@@ -38,7 +45,7 @@ function LaunchVim
             $vimArgs += "+<C-\><C-N>:cf $errorFile<CR>", $errorFile
         }
     }
-              
+
     Write-Verbose "gvim $vimArgs"
     gvim $vimArgs
 }
@@ -115,7 +122,7 @@ NAME:      Invoke-GVim
         else{
           $column = $groups[0].Index + 1
         }
-        
+
         $msg = $groups[0].Value
         $lines += '{0}:{1}:{2}:{3}'  -f $d.path, $d.LineNumber, $column, $msg
         continue
